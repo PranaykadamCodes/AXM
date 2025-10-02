@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String       @id @default(uuid())
+  email       String       @unique
+  password    String
+  name        String
+  role        String       @default("employee") // "admin" | "employee"
+  department  String?
+  position    String?
+  status      String       @default("pending")   // "active" | "pending" | "inactive"
+  deviceToken String?      // Push notifications
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  attendance  Attendance[]
+
+  @@map("users")
+}
+
+model Attendance {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId String?
+  type      String   // "IN" | "OUT"
+  method    String   // "QR" | "NFC" | "RFID"
+  token     String?  // qr token or tag uid
+  latitude  Float?
+  longitude Float?
+  createdAt DateTime @default(now())
+
+  @@map("attendance")
+}
