@@ -1,27 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { hashPassword } from '@/lib/auth'
-import { isValidEmail } from '@/lib/utils'
+import bcrypt from 'bcryptjs'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, name, department, position } = await request.json()
+    const body = await request.json()
+    const { name, email, password, department, position } = body
 
-    // Validation
-    if (!email || !password || !name) {
+    // Validate required fields
+    if (!name || !email || !password) {
       return NextResponse.json(
-        { error: 'Email, password, and name are required' },
+        { error: 'Name, email, and password are required' },
         { status: 400 }
       )
     }
 
-    if (!isValidEmail(email)) {
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
       return NextResponse.json(
         { error: 'Invalid email format' },
         { status: 400 }
       )
     }
 
+    // Validate password strength
     if (password.length < 6) {
       return NextResponse.json(
         { error: 'Password must be at least 6 characters long' },
@@ -37,38 +40,40 @@ export async function POST(request: NextRequest) {
     if (existingUser) {
       return NextResponse.json(
         { error: 'User with this email already exists' },
-        { status: 400 }
+        { status: 409 }
       )
     }
 
     // Hash password
-    const hashedPassword = await hashPassword(password)
+    const hashedPassword = await bcrypt.hash(password, 12)
 
-    // Create user with pending status
+    // Create user with pending status (requires admin approval)
     const user = await prisma.user.create({
       data: {
+        name,
         email,
         password: hashedPassword,
-        name,
         department: department || null,
         position: position || null,
+        role: 'employee',
         status: 'pending' // Requires admin approval
       },
       select: {
         id: true,
-        email: true,
         name: true,
+        email: true,
         department: true,
         position: true,
+        role: true,
         status: true,
         createdAt: true
       }
     })
 
     return NextResponse.json({
-      message: 'Registration successful. Please wait for admin approval.',
+      message: 'Registration successful! Your account is pending admin approval.',
       user
-    })
+    }, { status: 201 })
 
   } catch (error) {
     console.error('Registration error:', error)

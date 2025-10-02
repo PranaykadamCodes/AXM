@@ -4,6 +4,20 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import { 
+  QrCode, 
+  Clock, 
+  RefreshCw, 
+  Download, 
+  ArrowLeft,
+  Timer,
+  Zap,
+  Shield,
+  Activity
+} from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { GlassCard, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 interface QRData {
   token: string
@@ -67,71 +81,98 @@ export default function QRGeneratorPage() {
 
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch(`/api/admin/generate-qr?expires=${expiryMinutes}`, {
+      const response = await fetch('/api/admin/generate-qr', {
+        method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ expiryMinutes }),
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to generate QR code')
+      if (response.ok) {
+        const data = await response.json()
+        setQrData(data)
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Failed to generate QR code')
       }
-
-      const data = await response.json()
-      setQrData(data)
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to generate QR code')
+    } catch (err) {
+      setError('Network error')
     } finally {
       setLoading(false)
     }
   }
 
   const downloadQR = () => {
-    if (!qrData) return
-
-    const link = document.createElement('a')
-    link.download = `attendance-qr-${new Date().toISOString().split('T')[0]}.png`
-    link.href = qrData.qrCode
-    link.click()
+    if (qrData) {
+      const link = document.createElement('a')
+      link.href = qrData.qrCode
+      link.download = `attendance-qr-${Date.now()}.png`
+      link.click()
+    }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900">
+      {/* Animated Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 right-20 w-32 h-32 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-blob"></div>
+        <div className="absolute bottom-20 left-20 w-40 h-40 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float animation-delay-4000"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-36 h-36 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-float animation-delay-6000"></div>
+      </div>
+
+      {/* Header */}
+      <header className="relative z-10 p-4">
+        <GlassCard className="px-6 py-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link
-                href="/dashboard/admin"
-                className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                ← Back to Dashboard
-              </Link>
-              <h1 className="text-xl font-semibold text-gray-900">QR Code Generator</h1>
+              <Button variant="ghost" asChild>
+                <Link href="/dashboard/admin" className="flex items-center space-x-2">
+                  <ArrowLeft className="h-5 w-5" />
+                  <span>Back to Dashboard</span>
+                </Link>
+              </Button>
+              <div className="flex items-center space-x-2">
+                <QrCode className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  QR Code Generator
+                </h1>
+              </div>
             </div>
+            <ThemeToggle />
           </div>
-        </div>
-      </nav>
+        </GlassCard>
+      </header>
 
-      <div className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg p-6">
-          <div className="mb-6">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Generate Attendance QR Code</h2>
-            <p className="text-sm text-gray-600 mb-4">
-              Generate a QR code that employees can scan to mark their attendance. The QR code will expire after the specified time.
-            </p>
+      {/* Main Content */}
+      <main className="relative z-10 p-4">
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Generator Controls */}
+          <GlassCard className="p-8">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center px-4 py-2 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200 text-sm font-medium mb-4">
+                <Zap className="h-4 w-4 mr-2" />
+                Generate Secure QR Codes
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                Attendance QR Code
+              </h2>
+              <p className="text-gray-600 dark:text-gray-300">
+                Generate time-limited QR codes for secure attendance marking
+              </p>
+            </div>
 
-            <div className="flex items-center space-x-4 mb-4">
-              <div>
-                <label htmlFor="expiry" className="block text-sm font-medium text-gray-700">
-                  Expiry Time (minutes)
+            <div className="flex flex-col items-center space-y-6">
+              <div className="flex items-center space-x-4">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Expiry Time:
                 </label>
                 <select
-                  id="expiry"
                   value={expiryMinutes}
                   onChange={(e) => setExpiryMinutes(Number(e.target.value))}
-                  className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  className="bg-white/50 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent backdrop-blur-sm"
                 >
                   <option value={1}>1 minute</option>
                   <option value={5}>5 minutes</option>
@@ -142,116 +183,152 @@ export default function QRGeneratorPage() {
                 </select>
               </div>
 
-              <div className="flex items-end">
-                <button
-                  onClick={generateQR}
-                  disabled={loading}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? 'Generating...' : 'Generate QR Code'}
-                </button>
-              </div>
+              <Button
+                onClick={generateQR}
+                disabled={loading}
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2"
+              >
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span>Generating...</span>
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="h-5 w-5" />
+                    <span>Generate QR Code</span>
+                  </>
+                )}
+              </Button>
             </div>
 
             {error && (
-              <div className="mb-4 rounded-md bg-red-50 p-4">
-                <div className="text-sm text-red-700">{error}</div>
+              <div className="mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-600 dark:text-red-400 text-center">{error}</p>
               </div>
             )}
-          </div>
+          </GlassCard>
 
+          {/* QR Code Display */}
           {qrData && (
-            <div className="border-t pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* QR Code Display */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* QR Code */}
+              <GlassCard className="p-8">
                 <div className="text-center">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">QR Code</h3>
-                  <div className="inline-block p-4 bg-white border-2 border-gray-200 rounded-lg">
+                  <div className="flex items-center justify-center mb-6">
+                    <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl">
+                      <QrCode className="h-8 w-8 text-white" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                    Scan to Mark Attendance
+                  </h3>
+                  <div className="bg-white p-6 rounded-xl shadow-inner mb-6">
                     <Image
                       src={qrData.qrCode}
-                      alt="Attendance QR Code"
-                      width={300}
-                      height={300}
+                      alt="QR Code"
+                      width={200}
+                      height={200}
                       className="mx-auto"
                     />
                   </div>
-                  <div className="mt-4 space-y-2">
-                    <button
-                      onClick={downloadQR}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                    >
-                      Download QR Code
-                    </button>
-                    <button
-                      onClick={generateQR}
-                      className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                    >
-                      Generate New QR Code
-                    </button>
-                  </div>
+                  <Button
+                    onClick={downloadQR}
+                    variant="outline"
+                    className="flex items-center space-x-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    <span>Download QR Code</span>
+                  </Button>
                 </div>
+              </GlassCard>
 
-                {/* QR Code Info */}
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">QR Code Information</h3>
+              {/* QR Info */}
+              <div className="space-y-6">
+                <GlassCard className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-2">
+                      <Timer className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                        Time Remaining
+                      </h3>
+                    </div>
+                    <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      timeLeft === 'Expired' 
+                        ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200'
+                        : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200'
+                    }`}>
+                      {timeLeft}
+                    </div>
+                  </div>
                   <div className="space-y-3">
-                    <div>
-                      <dt className="text-sm font-medium text-gray-500">Status</dt>
-                      <dd className="mt-1">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          timeLeft === 'Expired' 
-                            ? 'bg-red-100 text-red-800' 
-                            : 'bg-green-100 text-green-800'
-                        }`}>
-                          {timeLeft === 'Expired' ? 'Expired' : 'Active'}
-                        </span>
-                      </dd>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-300">Generated:</span>
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {new Date().toLocaleTimeString()}
+                      </span>
                     </div>
-
-                    <div>
-                      <dt className="text-sm font-medium text-gray-500">Time Remaining</dt>
-                      <dd className="mt-1 text-sm text-gray-900 font-mono">
-                        {timeLeft || 'Calculating...'}
-                      </dd>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-300">Expires:</span>
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {new Date(qrData.expiresAt).toLocaleTimeString()}
+                      </span>
                     </div>
-
-                    <div>
-                      <dt className="text-sm font-medium text-gray-500">Expires At</dt>
-                      <dd className="mt-1 text-sm text-gray-900">
-                        {new Date(qrData.expiresAt).toLocaleString()}
-                      </dd>
-                    </div>
-
-                    <div>
-                      <dt className="text-sm font-medium text-gray-500">Validity Period</dt>
-                      <dd className="mt-1 text-sm text-gray-900">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600 dark:text-gray-300">Duration:</span>
+                      <span className="font-medium text-gray-900 dark:text-white">
                         {qrData.expiresInMinutes} minutes
-                      </dd>
-                    </div>
-
-                    <div>
-                      <dt className="text-sm font-medium text-gray-500">Token (for debugging)</dt>
-                      <dd className="mt-1 text-xs text-gray-600 font-mono break-all">
-                        {qrData.token}
-                      </dd>
+                      </span>
                     </div>
                   </div>
+                </GlassCard>
 
-                  <div className="mt-6 p-4 bg-blue-50 rounded-md">
-                    <h4 className="text-sm font-medium text-blue-900 mb-2">Instructions</h4>
-                    <ul className="text-sm text-blue-700 space-y-1">
-                      <li>• Employees can scan this QR code with their mobile devices</li>
-                      <li>• They need to be logged in to the attendance app</li>
-                      <li>• The QR code will automatically expire after the set time</li>
-                      <li>• Generate a new QR code when the current one expires</li>
-                    </ul>
+                <GlassCard className="p-6">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <Shield className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      Security Features
+                    </h3>
                   </div>
-                </div>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-gray-600 dark:text-gray-300">Time-limited access</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-gray-600 dark:text-gray-300">Unique token per session</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-gray-600 dark:text-gray-300">Encrypted data transmission</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-gray-600 dark:text-gray-300">Location tracking enabled</span>
+                    </div>
+                  </div>
+                </GlassCard>
+
+                <GlassCard className="p-6">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                      Usage Instructions
+                    </h3>
+                  </div>
+                  <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                    <p>1. Display this QR code to employees</p>
+                    <p>2. Employees scan with their mobile devices</p>
+                    <p>3. Attendance is automatically recorded</p>
+                    <p>4. Generate new codes when expired</p>
+                  </div>
+                </GlassCard>
               </div>
             </div>
           )}
         </div>
-      </div>
+      </main>
     </div>
   )
 }

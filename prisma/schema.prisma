@@ -11,18 +11,22 @@ datasource db {
 }
 
 model User {
-  id          String       @id @default(uuid())
-  email       String       @unique
-  password    String
-  name        String
-  role        String       @default("employee") // "admin" | "employee"
-  department  String?
-  position    String?
-  status      String       @default("pending")   // "active" | "pending" | "inactive"
-  deviceToken String?      // Push notifications
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  attendance  Attendance[]
+  id           String         @id @default(uuid())
+  email        String         @unique
+  password     String
+  name         String
+  role         String         @default("employee") // "admin" | "employee"
+  department   String?
+  position     String?
+  status       String         @default("pending")   // "active" | "pending" | "inactive"
+  deviceToken  String?        // Push notifications
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  attendance   Attendance[]
+  leaveRequests LeaveRequest[]
+  reviewedLeaveRequests LeaveRequest[] @relation("ReviewedBy")
+  wfhRequests  WFHRequest[]
+  reviewedWFHRequests WFHRequest[] @relation("WFHReviewedBy")
 
   @@map("users")
 }
@@ -40,4 +44,40 @@ model Attendance {
   createdAt DateTime @default(now())
 
   @@map("attendance")
+}
+
+model LeaveRequest {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          String    // "vacation" | "sick" | "personal" | "emergency"
+  startDate     DateTime
+  endDate       DateTime
+  reason        String
+  status        String    @default("pending") // "pending" | "approved" | "rejected"
+  adminComments String?
+  reviewedAt    DateTime?
+  reviewedBy    String?
+  reviewer      User?     @relation("ReviewedBy", fields: [reviewedBy], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("leave_requests")
+}
+
+model WFHRequest {
+  id            String    @id @default(uuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date          DateTime  // Single date for WFH
+  reason        String
+  status        String    @default("pending") // "pending" | "approved" | "rejected"
+  adminComments String?
+  reviewedAt    DateTime?
+  reviewedBy    String?
+  reviewer      User?     @relation("WFHReviewedBy", fields: [reviewedBy], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("wfh_requests")
 }

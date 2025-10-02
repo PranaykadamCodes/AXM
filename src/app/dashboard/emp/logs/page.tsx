@@ -3,7 +3,26 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { formatDate } from '@/lib/utils'
+import { format } from 'date-fns'
+import { 
+  Clock, 
+  Calendar, 
+  Filter, 
+  Download, 
+  ArrowLeft,
+  LogIn,
+  LogOut,
+  MapPin,
+  QrCode,
+  Smartphone,
+  ChevronLeft,
+  ChevronRight,
+  Activity,
+  TrendingUp
+} from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { GlassCard, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 interface AttendanceRecord {
   id: string
@@ -29,6 +48,14 @@ export default function EmployeeLogsPage() {
     total: 0,
     totalPages: 0
   })
+  const [stats, setStats] = useState({
+    totalRecords: 0,
+    checkIns: 0,
+    checkOuts: 0,
+    averageHours: 0
+  })
+  const [exportLoading, setExportLoading] = useState(false)
+  const [exportSuccess, setExportSuccess] = useState('')
   const router = useRouter()
 
   useEffect(() => {
@@ -47,7 +74,7 @@ export default function EmployeeLogsPage() {
     }
 
     fetchLogs()
-  }, [dateRange, pagination.page, router])
+  }, [router, pagination.page, dateRange])
 
   const fetchLogs = async () => {
     try {
@@ -65,245 +92,373 @@ export default function EmployeeLogsPage() {
         }
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch attendance logs')
+      if (response.ok) {
+        const data = await response.json()
+        setLogs(data.logs || [])
+        setPagination(prev => ({
+          ...prev,
+          total: data.total || 0,
+          totalPages: Math.ceil((data.total || 0) / prev.limit)
+        }))
+
+        // Calculate stats
+        const checkIns = data.logs?.filter((log: AttendanceRecord) => log.type === 'IN').length || 0
+        const checkOuts = data.logs?.filter((log: AttendanceRecord) => log.type === 'OUT').length || 0
+        
+        setStats({
+          totalRecords: data.total || 0,
+          checkIns,
+          checkOuts,
+          averageHours: checkOuts > 0 ? (checkIns / checkOuts) * 8 : 0 // Simplified calculation
+        })
+      } else {
+        setError('Failed to fetch attendance logs')
       }
-
-      const data = await response.json()
-      setLogs(data.logs)
-      setPagination(prev => ({
-        ...prev,
-        total: data.pagination.total,
-        totalPages: data.pagination.totalPages
-      }))
-
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Failed to fetch logs')
+    } catch (err) {
+      setError('Network error')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleDateChange = (field: 'startDate' | 'endDate', value: string) => {
-    setDateRange(prev => ({ ...prev, [field]: value }))
-    setPagination(prev => ({ ...prev, page: 1 })) // Reset to first page
+  const handleDateRangeChange = (field: string, value: string) => {
+    setDateRange(prev => ({
+      ...prev,
+      [field]: value
+    }))
+    setPagination(prev => ({ ...prev, page: 1 }))
+  }
+
+  const exportLogs = async () => {
+    setExportLoading(true)
+    setExportSuccess('')
+
+    try {
+      const token = localStorage.getItem('token')
+      
+      // Create CSV content
+      const csvHeaders = ['Date', 'Time', 'Type', 'Method', 'Session ID', 'Location']
+      const csvRows = logs.map(log => {
+        const date = new Date(log.createdAt)
+        return [
+          format(date, 'yyyy-MM-dd'),
+          format(date, 'HH:mm:ss'),
+          log.type,
+          log.method,
+          log.sessionId || '-',
+          log.latitude && log.longitude ? `${log.latitude.toFixed(4)}, ${log.longitude.toFixed(4)}` : '-'
+        ]
+      })
+
+      const csvContent = [
+        csvHeaders.join(','),
+        ...csvRows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ].join('\n')
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `my-attendance-logs-${format(new Date(), 'yyyy-MM-dd')}.csv`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      setExportSuccess('Attendance logs exported successfully!')
+      setTimeout(() => setExportSuccess(''), 3000)
+    } catch (err) {
+      console.error('Export error:', err)
+    } finally {
+      setExportLoading(false)
+    }
   }
 
   const handlePageChange = (newPage: number) => {
     setPagination(prev => ({ ...prev, page: newPage }))
   }
 
-  const exportLogs = async () => {
-    try {
-      const token = localStorage.getItem('token')
-      const params = new URLSearchParams({
-        startDate: dateRange.startDate,
-        endDate: dateRange.endDate,
-        format: 'excel'
-      })
-
-      const response = await fetch(`/api/reports/personal?${params}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to export logs')
-      }
-
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `attendance-logs-${dateRange.startDate}-to-${dateRange.endDate}.xlsx`
-      a.click()
-      window.URL.revokeObjectURL(url)
-
-    } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to export logs')
+  const getMethodIcon = (method: string) => {
+    switch (method.toLowerCase()) {
+      case 'qr':
+        return <QrCode className="h-4 w-4" />
+      case 'nfc':
+      case 'rfid':
+        return <Smartphone className="h-4 w-4" />
+      default:
+        return <Activity className="h-4 w-4" />
     }
+  }
+
+  const getTypeColor = (type: string) => {
+    return type === 'IN' 
+      ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200'
+      : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200'
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900 flex items-center justify-center">
+        <GlassCard className="p-8">
+          <div className="flex items-center space-x-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            <span className="text-lg font-medium">Loading attendance logs...</span>
+          </div>
+        </GlassCard>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900">
+      {/* Animated Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 right-20 w-32 h-32 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-blob"></div>
+        <div className="absolute bottom-20 left-20 w-40 h-40 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float animation-delay-4000"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-36 h-36 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-float animation-delay-6000"></div>
+      </div>
+
+      {/* Header */}
+      <header className="relative z-10 p-4">
+        <GlassCard className="px-6 py-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Link
-                href="/dashboard/emp"
-                className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                ← Back to Dashboard
-              </Link>
-              <h1 className="text-xl font-semibold text-gray-900">Attendance Logs</h1>
+              <Button variant="ghost" asChild>
+                <Link href="/dashboard/emp" className="flex items-center space-x-2">
+                  <ArrowLeft className="h-5 w-5" />
+                  <span>Back to Dashboard</span>
+                </Link>
+              </Button>
+              <div className="flex items-center space-x-2">
+                <Clock className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  Attendance Logs
+                </h1>
+              </div>
             </div>
-            <div className="flex items-center">
-              <button
-                onClick={exportLogs}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                Export Excel
-              </button>
-            </div>
+            <ThemeToggle />
           </div>
-        </div>
-      </nav>
+        </GlassCard>
+      </header>
 
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        {/* Filters */}
-        <div className="bg-white shadow rounded-lg p-6 mb-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Filter Logs</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">
-                Start Date
-              </label>
-              <input
-                type="date"
-                id="startDate"
-                value={dateRange.startDate}
-                onChange={(e) => handleDateChange('startDate', e.target.value)}
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
-            <div>
-              <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">
-                End Date
-              </label>
-              <input
-                type="date"
-                id="endDate"
-                value={dateRange.endDate}
-                onChange={(e) => handleDateChange('endDate', e.target.value)}
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
+      {/* Main Content */}
+      <main className="relative z-10 p-4">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <GlassCard className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Records</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {stats.totalRecords}
+                  </p>
+                </div>
+                <div className="p-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl">
+                  <Activity className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </GlassCard>
+
+            <GlassCard className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Check-ins</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {stats.checkIns}
+                  </p>
+                </div>
+                <div className="p-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl">
+                  <LogIn className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </GlassCard>
+
+            <GlassCard className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Check-outs</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {stats.checkOuts}
+                  </p>
+                </div>
+                <div className="p-3 bg-gradient-to-r from-red-500 to-pink-500 rounded-xl">
+                  <LogOut className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </GlassCard>
+
+            <GlassCard className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Avg Hours</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {stats.averageHours.toFixed(1)}h
+                  </p>
+                </div>
+                <div className="p-3 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl">
+                  <TrendingUp className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </GlassCard>
           </div>
-        </div>
 
-        {error && (
-          <div className="mb-6 rounded-md bg-red-50 p-4">
-            <div className="text-sm text-red-700">{error}</div>
-          </div>
-        )}
-
-        {/* Logs Table */}
-        <div className="bg-white shadow overflow-hidden sm:rounded-md">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-medium text-gray-900">
-                Attendance Records ({pagination.total} total)
-              </h3>
-            </div>
-
-            {logs.length > 0 ? (
-              <>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Date & Time
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Type
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Method
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Session
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Location
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {logs.map((log) => (
-                        <tr key={log.id}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {formatDate(log.createdAt)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              log.type === 'IN' 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-red-100 text-red-800'
-                            }`}>
-                              {log.type}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            <span className={`inline-flex px-2 py-1 text-xs font-medium rounded ${
-                              log.method === 'QR' 
-                                ? 'bg-blue-100 text-blue-800'
-                                : log.method === 'NFC'
-                                ? 'bg-purple-100 text-purple-800'
-                                : 'bg-gray-100 text-gray-800'
-                            }`}>
-                              {log.method}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                            {log.sessionId ? log.sessionId.slice(-8) : '-'}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {log.latitude && log.longitude 
-                              ? `${log.latitude.toFixed(4)}, ${log.longitude.toFixed(4)}`
-                              : '-'
-                            }
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+          {/* Filters */}
+          <GlassCard className="p-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+              <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-gray-400" />
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">From:</label>
+                  <input
+                    type="date"
+                    value={dateRange.startDate}
+                    onChange={(e) => handleDateRangeChange('startDate', e.target.value)}
+                    className="px-3 py-2 bg-white/50 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent backdrop-blur-sm"
+                  />
                 </div>
 
-                {/* Pagination */}
-                {pagination.totalPages > 1 && (
-                  <div className="flex items-center justify-between mt-6">
-                    <div className="text-sm text-gray-700">
-                      Showing page {pagination.page} of {pagination.totalPages}
-                    </div>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handlePageChange(pagination.page - 1)}
-                        disabled={pagination.page === 1}
-                        className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Previous
-                      </button>
-                      <button
-                        onClick={() => handlePageChange(pagination.page + 1)}
-                        disabled={pagination.page === pagination.totalPages}
-                        className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Next
-                      </button>
-                    </div>
-                  </div>
+                <div className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4 text-gray-400" />
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">To:</label>
+                  <input
+                    type="date"
+                    value={dateRange.endDate}
+                    onChange={(e) => handleDateRangeChange('endDate', e.target.value)}
+                    className="px-3 py-2 bg-white/50 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent backdrop-blur-sm"
+                  />
+                </div>
+              </div>
+
+              <Button 
+                onClick={exportLogs} 
+                disabled={exportLoading || logs.length === 0}
+                className="flex items-center space-x-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
+              >
+                {exportLoading ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                ) : (
+                  <Download className="h-4 w-4" />
                 )}
-              </>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-500">No attendance records found for the selected date range</p>
+                <span>Export CSV</span>
+              </Button>
+            </div>
+          </GlassCard>
+
+          {/* Export Success Message */}
+          {exportSuccess && (
+            <GlassCard className="p-4">
+              <div className="flex items-center space-x-3 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <span className="text-green-800 dark:text-green-200">{exportSuccess}</span>
+              </div>
+            </GlassCard>
+          )}
+
+          {/* Logs Table */}
+          <GlassCard className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Attendance Records
+              </h2>
+              <span className="text-sm text-gray-600 dark:text-gray-300">
+                Page {pagination.page} of {pagination.totalPages}
+              </span>
+            </div>
+
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
               </div>
             )}
-          </div>
+
+            <div className="space-y-4">
+              {logs.map((log) => (
+                <Card key={log.id} className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-white/20">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className={`p-2 rounded-lg ${getTypeColor(log.type)}`}>
+                          {log.type === 'IN' ? <LogIn className="h-4 w-4" /> : <LogOut className="h-4 w-4" />}
+                        </div>
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <span className="font-semibold text-gray-900 dark:text-white">
+                              {log.type === 'IN' ? 'Check In' : 'Check Out'}
+                            </span>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getTypeColor(log.type)}`}>
+                              {log.type}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">
+                            {format(new Date(log.createdAt), 'MMM dd, yyyy h:mm a')}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-300">
+                        <div className="flex items-center space-x-1">
+                          {getMethodIcon(log.method)}
+                          <span className="capitalize">{log.method}</span>
+                        </div>
+                        {log.latitude && log.longitude && (
+                          <div className="flex items-center space-x-1">
+                            <MapPin className="h-4 w-4" />
+                            <span>Located</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {logs.length === 0 && (
+              <div className="text-center py-12">
+                <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500 dark:text-gray-400">
+                  No attendance records found for the selected date range
+                </p>
+              </div>
+            )}
+
+            {/* Pagination */}
+            {pagination.totalPages > 1 && (
+              <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div className="text-sm text-gray-600 dark:text-gray-300">
+                  Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} records
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(pagination.page - 1)}
+                    disabled={pagination.page === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Previous
+                  </Button>
+                  <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200 rounded-md text-sm">
+                    {pagination.page}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handlePageChange(pagination.page + 1)}
+                    disabled={pagination.page === pagination.totalPages}
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </GlassCard>
         </div>
-      </div>
+      </main>
     </div>
   )
 }

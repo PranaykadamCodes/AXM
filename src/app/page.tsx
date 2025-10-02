@@ -1,190 +1,223 @@
 import Link from 'next/link'
+import { Button } from "@/components/ui/button"
+import { GlassCard } from "@/components/ui/card"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { 
+  QrCode, 
+  Smartphone, 
+  BarChart3, 
+  Users, 
+  Bell, 
+  FileText,
+  Sparkles,
+  Shield,
+  Zap,
+  Clock
+} from 'lucide-react'
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 right-20 w-32 h-32 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
+        <div className="absolute bottom-20 left-20 w-40 h-40 bg-yellow-300 rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-25 animate-float animation-delay-4000"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-36 h-36 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float animation-delay-6000"></div>
+      </div>
+
       {/* Navigation */}
-      <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <h1 className="text-2xl font-bold text-indigo-600">AttendanceSystem</h1>
-              </div>
+      <nav className="relative z-10">
+        <GlassCard className="mx-4 mt-4 px-6 py-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+              <Sparkles className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                AttendanceSystem
+              </h1>
             </div>
             <div className="flex items-center space-x-4">
-              <Link
-                href="/login"
-                className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Login
-              </Link>
-              <Link
-                href="/register"
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                Register
-              </Link>
+              <ThemeToggle />
+              <Button variant="ghost" asChild>
+                <Link href="/login">Login</Link>
+              </Button>
+              <Button asChild className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
+                <Link href="/register">Get Started</Link>
+              </Button>
             </div>
           </div>
-        </div>
+        </GlassCard>
       </nav>
 
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-            Modern Attendance
-            <span className="block text-indigo-600">Management System</span>
+          <div className="inline-flex items-center px-4 py-2 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-200 text-sm font-medium mb-8">
+            <Zap className="h-4 w-4 mr-2" />
+            Next-Generation Workforce Management
+          </div>
+          
+          <h1 className="text-5xl md:text-7xl font-bold mb-6">
+            <span className="bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+              Modern Attendance
+            </span>
+            <br />
+            <span className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Management System
+            </span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Streamline your workforce management with QR codes, NFC technology, and real-time analytics. 
-            Perfect for businesses of all sizes.
+          
+          <p className="text-xl text-gray-600 dark:text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
+            Transform your workforce management with cutting-edge QR codes, NFC technology, 
+            and real-time analytics. Built for the modern workplace.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/register"
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg text-lg font-medium transition-colors"
-            >
-              Get Started Free
-            </Link>
-            <Link
-              href="/login"
-              className="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-3 rounded-lg text-lg font-medium transition-colors"
-            >
-              Sign In
-            </Link>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+            <Button size="lg" asChild className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-lg px-8 py-4">
+              <Link href="/register">Start Free Trial</Link>
+            </Button>
+            <Button size="lg" variant="outline" asChild className="text-lg px-8 py-4">
+              <Link href="/login">Sign In</Link>
+            </Button>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-20">
+            {[
+              { label: "Active Users", value: "10K+" },
+              { label: "Companies", value: "500+" },
+              { label: "Attendance Records", value: "1M+" },
+              { label: "Uptime", value: "99.9%" }
+            ].map((stat, index) => (
+              <GlassCard key={index} className="p-6 text-center">
+                <div className="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">
+                  {stat.value}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-300">
+                  {stat.label}
+                </div>
+              </GlassCard>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Features Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Everything you need for attendance tracking
+          <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            Everything you need for
+            <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"> attendance tracking</span>
           </h2>
-          <p className="text-lg text-gray-600">
-            Comprehensive features designed for modern workplaces
+          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            Comprehensive features designed for modern workplaces with cutting-edge technology
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {/* QR Code Scanning */}
-          <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-            <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">QR Code Scanning</h3>
-            <p className="text-gray-600">
-              Quick and contactless attendance marking using dynamic QR codes with built-in security.
-            </p>
-          </div>
-
-          {/* NFC/RFID Support */}
-          <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M20,2H4A2,2 0 0,0 2,4V20A2,2 0 0,0 4,22H20A2,2 0 0,0 22,20V4A2,2 0 0,0 20,2M20,20H4V4H20V20M18,6H16.5A2.5,2.5 0 0,0 14,8.5V9.5A1.5,1.5 0 0,1 12.5,11H11V13H12.5A3.5,3.5 0 0,0 16,9.5V8.5A0.5,0.5 0 0,1 16.5,8H18V6M6,6V8H7.5A0.5,0.5 0 0,1 8,8.5V9.5A3.5,3.5 0 0,0 11.5,13H13V11H11.5A1.5,1.5 0 0,1 10,9.5V8.5A2.5,2.5 0 0,0 7.5,6H6Z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">NFC/RFID Support</h3>
-            <p className="text-gray-600">
-              Support for NFC cards and RFID tags for instant tap-to-mark attendance.
-            </p>
-          </div>
-
-          {/* Real-time Analytics */}
-          <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Real-time Analytics</h3>
-            <p className="text-gray-600">
-              Comprehensive dashboards with attendance trends, reports, and insights.
-            </p>
-          </div>
-
-          {/* Employee Management */}
-          <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Employee Management</h3>
-            <p className="text-gray-600">
-              Manage employee accounts, approvals, departments, and roles from a central dashboard.
-            </p>
-          </div>
-
-          {/* Push Notifications */}
-          <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4.868 19.718l8.485-8.485a2 2 0 012.828 0l1.414 1.414a2 2 0 010 2.828l-8.485 8.485A2 2 0 017.696 24H4a1 1 0 01-1-1v-3.696a2 2 0 01.586-1.414z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Push Notifications</h3>
-            <p className="text-gray-600">
-              Instant notifications for successful check-ins, check-outs, and important updates.
-            </p>
-          </div>
-
-          {/* Export Reports */}
-          <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
-              <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Export Reports</h3>
-            <p className="text-gray-600">
-              Generate and export attendance reports in Excel and PDF formats for payroll and HR.
-            </p>
-          </div>
+          {[
+            {
+              icon: QrCode,
+              title: "QR Code Scanning",
+              description: "Lightning-fast attendance marking with dynamic QR codes and advanced security features.",
+              gradient: "from-blue-500 to-cyan-500"
+            },
+            {
+              icon: Smartphone,
+              title: "NFC/RFID Support",
+              description: "Instant tap-to-mark attendance with NFC cards and RFID tags for seamless experience.",
+              gradient: "from-green-500 to-emerald-500"
+            },
+            {
+              icon: BarChart3,
+              title: "Real-time Analytics",
+              description: "Comprehensive dashboards with attendance trends, insights, and predictive analytics.",
+              gradient: "from-purple-500 to-pink-500"
+            },
+            {
+              icon: Users,
+              title: "Employee Management",
+              description: "Centralized employee management with roles, departments, and approval workflows.",
+              gradient: "from-indigo-500 to-blue-500"
+            },
+            {
+              icon: Bell,
+              title: "Smart Notifications",
+              description: "Instant push notifications for check-ins, check-outs, and important updates.",
+              gradient: "from-yellow-500 to-orange-500"
+            },
+            {
+              icon: FileText,
+              title: "Advanced Reports",
+              description: "Generate detailed reports in Excel and PDF formats with custom filters and insights.",
+              gradient: "from-red-500 to-pink-500"
+            }
+          ].map((feature, index) => (
+            <GlassCard key={index} className="p-8 hover:scale-105 transition-all duration-300 group">
+              <div className={`w-16 h-16 bg-gradient-to-r ${feature.gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                <feature.icon className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                {feature.title}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                {feature.description}
+              </p>
+            </GlassCard>
+          ))}
         </div>
       </div>
 
       {/* CTA Section */}
-      <div className="bg-indigo-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-white mb-4">
+      <div className="relative z-10 py-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <GlassCard className="p-12 text-center">
+            <Shield className="w-16 h-16 text-indigo-600 dark:text-indigo-400 mx-auto mb-6" />
+            <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Ready to modernize your attendance system?
             </h2>
-            <p className="text-xl text-indigo-100 mb-8">
-              Join thousands of companies already using our platform
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+              Join thousands of companies already using our platform to streamline their workforce management
             </p>
-            <Link
-              href="/register"
-              className="bg-white hover:bg-gray-100 text-indigo-600 px-8 py-3 rounded-lg text-lg font-medium transition-colors"
-            >
-              Start Free Trial
-            </Link>
-          </div>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" asChild className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-lg px-8 py-4">
+                <Link href="/register">Start Free Trial</Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild className="text-lg px-8 py-4">
+                <Link href="/login">Sign In</Link>
+              </Button>
+            </div>
+          </GlassCard>
         </div>
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="text-center">
-            <h3 className="text-2xl font-bold mb-4">AttendanceSystem</h3>
-            <p className="text-gray-400 mb-4">
-              Modern attendance management for the digital workplace
-            </p>
-            <div className="flex justify-center space-x-6">
-              <Link href="/login" className="text-gray-400 hover:text-white">Login</Link>
-              <Link href="/register" className="text-gray-400 hover:text-white">Register</Link>
+      <footer className="relative z-10 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <GlassCard className="p-8">
+            <div className="text-center">
+              <div className="flex items-center justify-center space-x-2 mb-4">
+                <Sparkles className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  AttendanceSystem
+                </h3>
+              </div>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                Modern attendance management for the digital workplace
+              </p>
+              <div className="flex justify-center space-x-6">
+                <Button variant="ghost" asChild>
+                  <Link href="/login">Login</Link>
+                </Button>
+                <Button variant="ghost" asChild>
+                  <Link href="/register">Register</Link>
+                </Button>
+              </div>
             </div>
-          </div>
+          </GlassCard>
         </div>
       </footer>
+
     </div>
   )
 }

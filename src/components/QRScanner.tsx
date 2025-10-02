@@ -21,12 +21,26 @@ export default function QRScanner({ onScan, onError, isScanning }: QRScannerProp
       return
     }
 
-    // Request camera permission
-    navigator.mediaDevices.getUserMedia({ video: true })
+    // Request camera permission with mobile-optimized constraints
+    const constraints = {
+      video: {
+        facingMode: { ideal: 'environment' }, // Prefer back camera
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      }
+    }
+
+    navigator.mediaDevices.getUserMedia(constraints)
       .then(() => setHasPermission(true))
-      .catch(() => {
-        setHasPermission(false)
-        onError('Camera permission denied')
+      .catch((error) => {
+        console.error('Camera permission error:', error)
+        // Try with basic constraints if advanced ones fail
+        navigator.mediaDevices.getUserMedia({ video: true })
+          .then(() => setHasPermission(true))
+          .catch(() => {
+            setHasPermission(false)
+            onError('Camera permission denied. Please allow camera access and try again.')
+          })
       })
   }, [onError])
 
@@ -87,11 +101,17 @@ export default function QRScanner({ onScan, onError, isScanning }: QRScannerProp
       <div className="aspect-square max-w-sm mx-auto bg-black rounded-lg overflow-hidden">
         <QrReader
           onResult={handleScan}
-          onError={handleError}
           constraints={{
-            facingMode: 'environment' // Use back camera
+            facingMode: { ideal: 'environment' }, // Prefer back camera on mobile
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
           }}
           className="w-full h-full"
+          videoStyle={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover'
+          }}
         />
       </div>
       
