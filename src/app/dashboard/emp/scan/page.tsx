@@ -84,7 +84,7 @@ export default function ScanAttendancePage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          token: data,
+          qrToken: data,
           type: attendanceType,
           method: method.toUpperCase(),
           latitude: location?.latitude,

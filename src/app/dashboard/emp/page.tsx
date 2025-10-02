@@ -384,11 +384,11 @@ export default function EmployeeDashboard() {
                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Legend</h4>
                 <div className="grid grid-cols-3 gap-2 text-xs">
                   <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-green-500 rounded-md border-2 border-green-600"></div>
+                    <div className="w-4 h-4 bg-emerald-500 rounded-md border-2 border-emerald-600"></div>
                     <span className="text-gray-600 dark:text-gray-300 font-medium">Present</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-yellow-500 rounded-md border-2 border-yellow-600"></div>
+                    <div className="w-4 h-4 bg-amber-500 rounded-md border-2 border-amber-600"></div>
                     <span className="text-gray-600 dark:text-gray-300 font-medium">Partial</span>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -462,8 +462,8 @@ export default function EmployeeDashboard() {
                 <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
                   <div className="flex items-center space-x-3">
                     <div className={`w-3 h-3 rounded-full ${
-                      selectedDateAttendance.status === 'present' ? 'bg-green-500' :
-                      selectedDateAttendance.status === 'partial' ? 'bg-yellow-500' :
+                      selectedDateAttendance.status === 'present' ? 'bg-emerald-500' :
+                      selectedDateAttendance.status === 'partial' ? 'bg-amber-500' :
                       'bg-red-500'
                     }`}></div>
                     <span className="font-medium capitalize">{selectedDateAttendance.status}</span>

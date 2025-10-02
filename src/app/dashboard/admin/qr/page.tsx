@@ -81,9 +81,15 @@ export default function QRGeneratorPage() {
         const difference = expiry - now
 
         if (difference > 0) {
+          const hours = Math.floor(difference / (1000 * 60 * 60))
           const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60))
           const seconds = Math.floor((difference % (1000 * 60)) / 1000)
-          setTimeLeft(`${minutes}:${seconds.toString().padStart(2, '0')}`)
+          
+          if (hours > 0) {
+            setTimeLeft(`${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`)
+          } else {
+            setTimeLeft(`${minutes}:${seconds.toString().padStart(2, '0')}`)
+          }
         } else {
           setTimeLeft('Expired')
           if (interval) clearInterval(interval)

@@ -187,4 +187,27 @@
   .qr-scanner canvas {
     display: none !important;
   }
+
+  /* Line clamp utilities */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Notification z-index override */
+  .notification-dropdown {
+    z-index: 999999 !important;
+    position: absolute !important;
+  }
+
+  .notification-backdrop {
+    z-index: 999998 !important;
+  }
+
+  .notification-container {
+    z-index: 999999 !important;
+    position: relative !important;
+  }
 }
