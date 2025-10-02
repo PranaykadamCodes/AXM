@@ -60,19 +60,6 @@ export default function LoginPage() {
     })
   }
 
-  const fillDemoCredentials = (role: 'admin' | 'employee') => {
-    if (role === 'admin') {
-      setFormData({
-        email: 'admin@company.com',
-        password: 'admin123'
-      })
-    } else {
-      setFormData({
-        email: 'john.doe@company.com',
-        password: 'employee123'
-      })
-    }
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900 flex items-center justify-center p-4">
@@ -116,28 +103,6 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Demo Credentials */}
-          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-            <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-3">Demo Credentials:</p>
-            <div className="grid grid-cols-2 gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => fillDemoCredentials('admin')}
-                className="text-xs"
-              >
-                Admin Login
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => fillDemoCredentials('employee')}
-                className="text-xs"
-              >
-                Employee Login
-              </Button>
-            </div>
-          </div>
 
           {/* Error Message */}
           {error && (
