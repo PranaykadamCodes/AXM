@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { QrReader } from 'react-qr-reader'
+import QrScanner from 'react-qr-barcode-scanner'
 
 interface QRScannerProps {
   onScan: (data: string) => void
@@ -44,9 +44,9 @@ export default function QRScanner({ onScan, onError, isScanning }: QRScannerProp
       })
   }, [onError])
 
-  const handleScan = (result: any) => {
+  const handleScan = (result: string | null) => {
     if (result && isScanning) {
-      onScan(result.text)
+      onScan(result)
     }
   }
 
@@ -99,18 +99,14 @@ export default function QRScanner({ onScan, onError, isScanning }: QRScannerProp
   return (
     <div className="relative">
       <div className="aspect-square max-w-sm mx-auto bg-black rounded-lg overflow-hidden">
-        <QrReader
-          onResult={handleScan}
-          constraints={{
-            facingMode: { ideal: 'environment' }, // Prefer back camera on mobile
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          }}
-          className="w-full h-full"
-          videoStyle={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover'
+        <QrScanner
+          onUpdate={(err, result) => {
+            if (result && isScanning) {
+              handleScan(result.getText())
+            }
+            if (err) {
+              handleError(err)
+            }
           }}
         />
       </div>
