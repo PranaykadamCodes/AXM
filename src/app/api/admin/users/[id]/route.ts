@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs'
 // Update user (Admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check authorization
@@ -28,12 +28,13 @@ export async function PUT(
       )
     }
 
+    const resolvedParams = await params
     const body = await request.json()
     const { name, email, role, department, position, status, password } = body
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
-      where: { id: params.id }
+      where: { id: resolvedParams.id }
     })
 
     if (!existingUser) {
@@ -74,7 +75,7 @@ export async function PUT(
 
     // Update user
     const updatedUser = await prisma.user.update({
-      where: { id: params.id },
+      where: { id: resolvedParams.id },
       data: updateData,
       select: {
         id: true,
@@ -106,7 +107,7 @@ export async function PUT(
 // Delete user (Admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check authorization
@@ -128,9 +129,11 @@ export async function DELETE(
       )
     }
 
+    const resolvedParams = await params
+    
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
-      where: { id: params.id }
+      where: { id: resolvedParams.id }
     })
 
     if (!existingUser) {
@@ -156,7 +159,7 @@ export async function DELETE(
 
     // Delete user (this will cascade delete related records)
     await prisma.user.delete({
-      where: { id: params.id }
+      where: { id: resolvedParams.id }
     })
 
     return NextResponse.json({

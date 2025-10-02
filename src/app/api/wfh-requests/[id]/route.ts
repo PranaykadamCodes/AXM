@@ -5,7 +5,7 @@ import { verifyToken } from '@/lib/auth'
 // Update WFH request status (Admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check authorization
@@ -27,6 +27,7 @@ export async function PUT(
       )
     }
 
+    const resolvedParams = await params
     const body = await request.json()
     const { status, adminComments } = body
 
@@ -38,8 +39,8 @@ export async function PUT(
     }
 
     // Update WFH request
-    const updatedRequest = await prisma.WFHRequest.update({
-      where: { id: params.id },
+    const updatedRequest = await prisma.wFHRequest.update({
+      where: { id: resolvedParams.id },
       data: {
         status,
         adminComments: adminComments || null,
@@ -76,7 +77,7 @@ export async function PUT(
 // Delete WFH request
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check authorization
@@ -98,9 +99,11 @@ export async function DELETE(
       )
     }
 
+    const resolvedParams = await params
+    
     // Get the WFH request to check ownership
-    const wfhRequest = await prisma.WFHRequest.findUnique({
-      where: { id: params.id }
+    const wfhRequest = await prisma.wFHRequest.findUnique({
+      where: { id: resolvedParams.id }
     })
 
     if (!wfhRequest) {
@@ -126,8 +129,8 @@ export async function DELETE(
       )
     }
 
-    await prisma.WFHRequest.delete({
-      where: { id: params.id }
+    await prisma.wFHRequest.delete({
+      where: { id: resolvedParams.id }
     })
 
     return NextResponse.json({

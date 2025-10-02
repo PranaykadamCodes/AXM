@@ -47,8 +47,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if user already has a WFH request for this date
-    const existingRequest = await prisma.WFHRequest.findFirst({
+        // Check if user already has a WFH request for this date
+        const existingRequest = await prisma.wFHRequest.findFirst({
       where: {
         userId: payload.userId,
         date: {
@@ -65,8 +65,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create WFH request
-    const wfhRequest = await prisma.WFHRequest.create({
+        // Create WFH request
+        const wfhRequest = await prisma.wFHRequest.create({
       data: {
         userId: payload.userId,
         date: new Date(date),
@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
 
-    let whereClause: any = {}
+    const whereClause: Record<string, unknown> = {}
 
     // If not admin, only show user's own requests
     if (payload.role !== 'admin') {
@@ -137,7 +137,7 @@ export async function GET(request: NextRequest) {
       whereClause.status = status
     }
 
-    const wfhRequests = await prisma.WFHRequest.findMany({
+        const wfhRequests = await prisma.wFHRequest.findMany({
       where: whereClause,
       include: {
         user: {

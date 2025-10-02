@@ -114,10 +114,12 @@ export async function GET(request: NextRequest) {
 
     // Calculate average working hours (simplified - assumes IN/OUT pairs)
     const sessions = attendanceData.reduce((acc: any, record) => {
-      if (!acc[record.sessionId]) {
+      if (record.sessionId && !acc[record.sessionId]) {
         acc[record.sessionId] = {}
       }
-      acc[record.sessionId][record.type] = record.createdAt
+      if (record.sessionId) {
+        acc[record.sessionId][record.type] = record.createdAt
+      }
       return acc
     }, {})
 

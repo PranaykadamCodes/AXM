@@ -242,7 +242,7 @@ export default function ChangePasswordPage() {
                   Security Guidelines
                 </h3>
                 <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-                  <li>• Use a strong, unique password that you don't use elsewhere</li>
+                  <li>• Use a strong, unique password that you don&apos;t use elsewhere</li>
                   <li>• Include a mix of uppercase, lowercase, numbers, and special characters</li>
                   <li>• Avoid using personal information like names or dates</li>
                   <li>• You will be logged out after changing your password</li>

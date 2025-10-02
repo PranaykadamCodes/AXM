@@ -90,7 +90,7 @@ export default function AdminLeaveRequestsPage() {
           userName: req.user.name,
           userEmail: req.user.email,
           userDepartment: req.user.department,
-          duration: Math.ceil((new Date(req.endDate) - new Date(req.startDate)) / (1000 * 60 * 60 * 24)) + 1
+          duration: Math.ceil((new Date(req.endDate).getTime() - new Date(req.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1
         }))
         setLeaveRequests(requests)
       } else {
@@ -505,7 +505,7 @@ export default function AdminLeaveRequestsPage() {
             </div>
             
             <p className="text-gray-600 dark:text-gray-300 mb-4">
-              Please provide a reason for rejecting {selectedRequest.userName}'s leave request:
+              Please provide a reason for rejecting {selectedRequest.userName}&apos;s leave request:
             </p>
             
             <textarea

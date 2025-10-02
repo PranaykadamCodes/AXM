@@ -156,7 +156,7 @@ export default function AdminReportsPage() {
           const url = window.URL.createObjectURL(blob)
           const link = document.createElement('a')
           link.href = url
-          link.download = `attendance-report-${format(new Date(), 'yyyy-MM-dd')}.xlsx`
+          link.download = `attendance-report-${new Date().toISOString().split('T')[0]}.xlsx`
           document.body.appendChild(link)
           link.click()
           document.body.removeChild(link)
@@ -168,7 +168,7 @@ export default function AdminReportsPage() {
           const url = window.URL.createObjectURL(blob)
           const link = document.createElement('a')
           link.href = url
-          link.download = `attendance-report-${format(new Date(), 'yyyy-MM-dd')}.json`
+          link.download = `attendance-report-${new Date().toISOString().split('T')[0]}.json`
           document.body.appendChild(link)
           link.click()
           document.body.removeChild(link)

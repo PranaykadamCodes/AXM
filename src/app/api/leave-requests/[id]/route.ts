@@ -5,7 +5,7 @@ import { verifyToken } from '@/lib/auth'
 // Update leave request status (Admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check authorization
@@ -27,6 +27,7 @@ export async function PUT(
       )
     }
 
+    const resolvedParams = await params
     const body = await request.json()
     const { status, adminComments } = body
 
@@ -39,7 +40,7 @@ export async function PUT(
 
     // Update leave request
     const updatedRequest = await prisma.leaveRequest.update({
-      where: { id: params.id },
+      where: { id: resolvedParams.id },
       data: {
         status,
         adminComments: adminComments || null,
@@ -76,7 +77,7 @@ export async function PUT(
 // Delete leave request
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check authorization
@@ -98,9 +99,11 @@ export async function DELETE(
       )
     }
 
+    const resolvedParams = await params
+    
     // Get the leave request to check ownership
     const leaveRequest = await prisma.leaveRequest.findUnique({
-      where: { id: params.id }
+      where: { id: resolvedParams.id }
     })
 
     if (!leaveRequest) {
@@ -127,7 +130,7 @@ export async function DELETE(
     }
 
     await prisma.leaveRequest.delete({
-      where: { id: params.id }
+      where: { id: resolvedParams.id }
     })
 
     return NextResponse.json({
