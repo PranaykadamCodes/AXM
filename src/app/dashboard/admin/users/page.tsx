@@ -46,6 +46,15 @@ export default function ManageUsersPage() {
   const [filter, setFilter] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [showAddModal, setShowAddModal] = useState(false)
+  const [addUserData, setAddUserData] = useState({
+    email: '',
+    password: '',
+    name: '',
+    department: '',
+    position: '',
+    role: 'employee'
+  })
+  const [addUserLoading, setAddUserLoading] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -131,6 +140,72 @@ export default function ManageUsersPage() {
     }
   }
 
+  const addUser = async () => {
+    if (!addUserData.email || !addUserData.password || !addUserData.name) {
+      setError('Email, password, and name are required')
+      return
+    }
+
+    setAddUserLoading(true)
+    setError('')
+
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch('/api/admin/users/add', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(addUserData),
+      })
+
+      if (response.ok) {
+        setShowAddModal(false)
+        setAddUserData({
+          email: '',
+          password: '',
+          name: '',
+          department: '',
+          position: '',
+          role: 'employee'
+        })
+        fetchUsers() // Refresh the list
+      } else {
+        const errorData = await response.json()
+        setError(errorData.error || 'Failed to add user')
+      }
+    } catch (err) {
+      setError('Network error')
+    } finally {
+      setAddUserLoading(false)
+    }
+  }
+
+  const deleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      return
+    }
+
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+
+      if (response.ok) {
+        fetchUsers() // Refresh the list
+      } else {
+        setError('Failed to delete user')
+      }
+    } catch (err) {
+      setError('Network error')
+    }
+  }
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
@@ -181,20 +256,22 @@ export default function ManageUsersPage() {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 p-4">
-        <GlassCard className="px-6 py-4">
+      <header className="relative z-10 p-2 sm:p-4">
+        <GlassCard className="px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" asChild>
-                <Link href="/dashboard/admin" className="flex items-center space-x-2">
-                  <ArrowLeft className="h-5 w-5" />
-                  <span>Back to Dashboard</span>
+            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+              <Button variant="ghost" asChild className="flex-shrink-0">
+                <Link href="/dashboard/admin" className="flex items-center space-x-1 sm:space-x-2">
+                  <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="hidden sm:inline">Back to Dashboard</span>
+                  <span className="sm:hidden">Back</span>
                 </Link>
               </Button>
-              <div className="flex items-center space-x-2">
-                <Users className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  User Management
+              <div className="flex items-center space-x-2 min-w-0">
+                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+                <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent truncate">
+                  <span className="hidden sm:inline">User Management</span>
+                  <span className="sm:hidden">Users</span>
                 </h1>
               </div>
             </div>
@@ -238,7 +315,10 @@ export default function ManageUsersPage() {
                 </div>
               </div>
 
-              <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
+              <Button 
+                onClick={() => setShowAddModal(true)}
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+              >
                 <UserPlus className="h-4 w-4 mr-2" />
                 Add User
               </Button>
@@ -337,9 +417,24 @@ export default function ManageUsersPage() {
                           </div>
                         </div>
                       </div>
-                      <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
-                        <MoreVertical className="h-4 w-4 text-gray-400" />
-                      </button>
+                      <div className="flex space-x-1">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => updateUserStatus(user.id, user.status === 'active' ? 'inactive' : 'active')}
+                          className="h-7 px-2 text-xs"
+                        >
+                          {user.status === 'active' ? 'Block' : 'Unblock'}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => deleteUser(user.id)}
+                          className="h-7 px-2 text-xs"
+                        >
+                          Delete
+                        </Button>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
@@ -406,6 +501,137 @@ export default function ManageUsersPage() {
           </GlassCard>
         </div>
       </main>
+
+      {/* Add User Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <GlassCard className="w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Add New User</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAddModal(false)}
+                className="p-2"
+              >
+                <XCircle className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  value={addUserData.name}
+                  onChange={(e) => setAddUserData({ ...addUserData, name: e.target.value })}
+                  className="w-full px-3 py-2 bg-white/50 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  placeholder="Enter full name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  value={addUserData.email}
+                  onChange={(e) => setAddUserData({ ...addUserData, email: e.target.value })}
+                  className="w-full px-3 py-2 bg-white/50 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  placeholder="Enter email address"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Password *
+                </label>
+                <input
+                  type="password"
+                  value={addUserData.password}
+                  onChange={(e) => setAddUserData({ ...addUserData, password: e.target.value })}
+                  className="w-full px-3 py-2 bg-white/50 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  placeholder="Enter password (min 6 characters)"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Department
+                </label>
+                <input
+                  type="text"
+                  value={addUserData.department}
+                  onChange={(e) => setAddUserData({ ...addUserData, department: e.target.value })}
+                  className="w-full px-3 py-2 bg-white/50 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  placeholder="Enter department"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Position
+                </label>
+                <input
+                  type="text"
+                  value={addUserData.position}
+                  onChange={(e) => setAddUserData({ ...addUserData, position: e.target.value })}
+                  className="w-full px-3 py-2 bg-white/50 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  placeholder="Enter position"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Role
+                </label>
+                <select
+                  value={addUserData.role}
+                  onChange={(e) => setAddUserData({ ...addUserData, role: e.target.value })}
+                  className="w-full px-3 py-2 bg-white/50 dark:bg-gray-800/50 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                >
+                  <option value="employee">Employee</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            </div>
+
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              </div>
+            )}
+
+            <div className="flex space-x-3 mt-6">
+              <Button
+                onClick={() => setShowAddModal(false)}
+                variant="outline"
+                className="flex-1"
+                disabled={addUserLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={addUser}
+                className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                disabled={addUserLoading}
+              >
+                {addUserLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Adding...
+                  </>
+                ) : (
+                  'Add User'
+                )}
+              </Button>
+            </div>
+          </GlassCard>
+        </div>
+      )}
     </div>
   )
 }

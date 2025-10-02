@@ -164,4 +164,27 @@
   .animation-delay-6000 {
     animation-delay: 6s;
   }
+  
+  /* Extra small screens utility */
+  @media (min-width: 480px) {
+    .xs\:inline-flex {
+      display: inline-flex !important;
+    }
+    
+    .xs\:hidden {
+      display: none !important;
+    }
+  }
+
+  /* QR Scanner video styling */
+  .qr-scanner video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 0.5rem !important;
+  }
+
+  .qr-scanner canvas {
+    display: none !important;
+  }
 }

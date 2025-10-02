@@ -28,21 +28,31 @@ export default function Home() {
 
       {/* Navigation */}
       <nav className="relative z-10">
-        <GlassCard className="mx-4 mt-4 px-6 py-4">
+        <GlassCard className="mx-2 sm:mx-4 mt-2 sm:mt-4 px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
-              <Sparkles className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                AttendanceSystem
+              <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600 dark:text-indigo-400" />
+              <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent truncate">
+                <span className="hidden sm:inline">AttendanceSystem</span>
+                <span className="sm:hidden">AMS</span>
               </h1>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <ThemeToggle />
-              <Button variant="ghost" asChild>
+              <Button variant="ghost" asChild className="hidden xs:inline-flex">
                 <Link href="/login">Login</Link>
               </Button>
-              <Button asChild className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
-                <Link href="/register">Get Started</Link>
+              <Button variant="ghost" asChild className="xs:hidden p-2">
+                <Link href="/login">
+                  <span className="sr-only">Login</span>
+                  L
+                </Link>
+              </Button>
+              <Button asChild className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-xs sm:text-sm px-2 sm:px-4">
+                <Link href="/register">
+                  <span className="hidden sm:inline">Get Started</span>
+                  <span className="sm:hidden">Start</span>
+                </Link>
               </Button>
             </div>
           </div>

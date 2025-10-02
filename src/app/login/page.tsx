@@ -72,16 +72,19 @@ export default function LoginPage() {
       </div>
 
       {/* Theme Toggle */}
-      <div className="absolute top-4 right-4 z-20">
+      <div className="absolute top-2 sm:top-4 right-2 sm:right-4 z-20">
         <ThemeToggle />
       </div>
 
       {/* Back to Home */}
-      <div className="absolute top-4 left-4 z-20">
-        <Button variant="ghost" asChild>
-          <Link href="/" className="flex items-center space-x-2">
-            <Sparkles className="h-5 w-5" />
-            <span>Home</span>
+      <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-20">
+        <Button variant="ghost" asChild className="p-2 sm:p-3">
+          <Link href="/" className="flex items-center space-x-1 sm:space-x-2">
+            <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="text-sm sm:text-base">
+              <span className="hidden xs:inline">Home</span>
+              <span className="xs:hidden">H</span>
+            </span>
           </Link>
         </Button>
       </div>

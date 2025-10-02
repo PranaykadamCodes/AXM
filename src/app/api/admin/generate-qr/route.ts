@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyToken, generateQRToken } from '@/lib/auth'
 import QRCode from 'qrcode'
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
     // Check authorization
     const authHeader = request.headers.get('authorization')
@@ -23,8 +23,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const { searchParams } = new URL(request.url)
-    const expiresInMinutes = parseInt(searchParams.get('expires') || '5')
+    const { expiryMinutes } = await request.json()
+    const expiresInMinutes = expiryMinutes || 5
 
     // Generate QR token (not tied to specific user - will be used by any authenticated user)
     const qrToken = generateQRToken('attendance-system', expiresInMinutes)

@@ -151,21 +151,22 @@ export default function AdminDashboard() {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 p-4">
-        <GlassCard className="px-6 py-4">
+      <header className="relative z-10 p-2 sm:p-4">
+        <GlassCard className="px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
               <div className="flex items-center space-x-2">
-                <Activity className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  Admin Dashboard
+                <Activity className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+                <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent truncate">
+                  <span className="hidden sm:inline">Admin Dashboard</span>
+                  <span className="sm:hidden">Admin</span>
                 </h1>
               </div>
-              <div className="hidden md:flex items-center space-x-2 ml-8">
+              <div className="hidden lg:flex items-center space-x-2 ml-4 sm:ml-8">
                 <select 
                   value={period} 
                   onChange={(e) => setPeriod(e.target.value)}
-                  className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="day">Today</option>
                   <option value="week">This Week</option>
@@ -174,11 +175,23 @@ export default function AdminDashboard() {
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-1 sm:space-x-4 flex-shrink-0">
+              {/* Mobile period selector */}
+              <div className="lg:hidden">
+                <select 
+                  value={period} 
+                  onChange={(e) => setPeriod(e.target.value)}
+                  className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 w-16"
+                >
+                  <option value="day">Day</option>
+                  <option value="week">Week</option>
+                  <option value="month">Month</option>
+                </select>
+              </div>
               <NotificationBell userRole="admin" />
               <ThemeToggle />
-              <Button variant="ghost" size="icon" onClick={handleLogout}>
-                <LogOut className="h-5 w-5" />
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="h-8 w-8 sm:h-10 sm:w-10">
+                <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </div>
           </div>
@@ -264,8 +277,8 @@ export default function AdminDashboard() {
           <GlassCard className="p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Daily Attendance</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Check-ins and check-outs over time</p>
+                <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white">Daily Attendance</h3>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Check-ins and check-outs over time</p>
               </div>
               <BarChart3 className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
             </div>
@@ -295,20 +308,26 @@ export default function AdminDashboard() {
           <GlassCard className="p-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Department Attendance</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300">Attendance by department</p>
+                <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white">Department Attendance</h3>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Attendance by department</p>
               </div>
               <Users className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
             </div>
-            <ChartContainer config={chartConfig} className="h-[300px]">
+            <ChartContainer config={chartConfig} className="h-[250px] sm:h-[300px]">
               <PieChart>
                 <Pie
                   data={analytics?.charts.departmentAttendance || []}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
+                  label={({ name, percent }: any) => {
+                    // Hide labels on small screens to prevent overlap
+                    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+                      return ''
+                    }
+                    return `${name} ${(percent * 100).toFixed(0)}%`
+                  }}
+                  outerRadius="65%"
                   fill="#8884d8"
                   dataKey="count"
                 >
@@ -329,8 +348,8 @@ export default function AdminDashboard() {
             <GlassCard className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Attendance Methods</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">How employees are checking in</p>
+                  <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white">Attendance Methods</h3>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">How employees are checking in</p>
                 </div>
                 <QrCode className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
               </div>
@@ -355,7 +374,7 @@ export default function AdminDashboard() {
 
           {/* Quick Actions */}
           <GlassCard className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Quick Actions</h3>
+            <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white mb-6">Quick Actions</h3>
             <div className="space-y-4">
               <Button asChild className="w-full justify-start bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
                 <Link href="/dashboard/admin/users">

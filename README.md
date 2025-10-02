@@ -2,6 +2,27 @@
 
 A comprehensive **QR + NFC/RFID Attendance System** built with **Next.js 15 (App Router)**, **Tailwind CSS**, **Prisma (PostgreSQL)**, and **Firebase Admin (FCM)**. Features employee account management, role-based dashboards, attendance logging, push notifications, and analytics with report exports.
 
+## 🗄️ Database Setup (Neon)
+
+This project is configured to work with **Neon Database** - a serverless PostgreSQL platform.
+
+### Quick Setup:
+```bash
+# 1. Interactive setup (recommended)
+npm run setup
+
+# 2. Manual setup
+cp env.example .env
+# Edit .env with your Neon connection string
+
+# 3. Setup database
+npm run db:push
+npm run db:seed
+npm run dev
+```
+
+📖 **Detailed Setup Guide**: See [NEON_DB_SETUP.md](./NEON_DB_SETUP.md)
+
 ## 🚀 Features
 
 ### Authentication & User Management

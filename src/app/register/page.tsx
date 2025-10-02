@@ -126,11 +126,14 @@ export default function RegisterPage() {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 p-4">
+      <header className="relative z-10 p-2 sm:p-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors">
-            <ArrowLeft className="h-5 w-5" />
-            <span className="font-medium">Back to Home</span>
+          <Link href="/" className="flex items-center space-x-1 sm:space-x-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors">
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+            <span className="font-medium text-sm sm:text-base">
+              <span className="hidden sm:inline">Back to Home</span>
+              <span className="sm:hidden">Home</span>
+            </span>
           </Link>
           <ThemeToggle />
         </div>

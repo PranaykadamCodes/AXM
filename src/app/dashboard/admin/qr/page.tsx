@@ -48,6 +48,27 @@ export default function QRGeneratorPage() {
       router.push('/dashboard/emp')
       return
     }
+
+    // Load existing QR data from localStorage
+    const savedQrData = localStorage.getItem('currentQrData')
+    if (savedQrData) {
+      try {
+        const parsedData = JSON.parse(savedQrData)
+        const now = new Date().getTime()
+        const expiry = new Date(parsedData.expiresAt).getTime()
+        
+        // Only restore if QR is still valid
+        if (expiry > now) {
+          setQrData(parsedData)
+        } else {
+          // Remove expired QR from storage
+          localStorage.removeItem('currentQrData')
+        }
+      } catch (e) {
+        // Remove invalid data
+        localStorage.removeItem('currentQrData')
+      }
+    }
   }, [router])
 
   useEffect(() => {
@@ -93,6 +114,8 @@ export default function QRGeneratorPage() {
       if (response.ok) {
         const data = await response.json()
         setQrData(data)
+        // Save QR data to localStorage for persistence
+        localStorage.setItem('currentQrData', JSON.stringify(data))
       } else {
         const errorData = await response.json()
         setError(errorData.error || 'Failed to generate QR code')
@@ -113,6 +136,19 @@ export default function QRGeneratorPage() {
     }
   }
 
+  const deleteQR = () => {
+    setQrData(null)
+    localStorage.removeItem('currentQrData')
+    setTimeLeft('')
+    setError('')
+  }
+
+  const refreshQR = () => {
+    if (qrData) {
+      generateQR()
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900">
       {/* Animated Background */}
@@ -124,20 +160,22 @@ export default function QRGeneratorPage() {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 p-4">
-        <GlassCard className="px-6 py-4">
+      <header className="relative z-10 p-2 sm:p-4">
+        <GlassCard className="px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" asChild>
-                <Link href="/dashboard/admin" className="flex items-center space-x-2">
-                  <ArrowLeft className="h-5 w-5" />
-                  <span>Back to Dashboard</span>
+            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+              <Button variant="ghost" asChild className="flex-shrink-0">
+                <Link href="/dashboard/admin" className="flex items-center space-x-1 sm:space-x-2">
+                  <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="hidden sm:inline">Back to Dashboard</span>
+                  <span className="sm:hidden">Back</span>
                 </Link>
               </Button>
-              <div className="flex items-center space-x-2">
-                <QrCode className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  QR Code Generator
+              <div className="flex items-center space-x-2 min-w-0">
+                <QrCode className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+                <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent truncate">
+                  <span className="hidden sm:inline">QR Code Generator</span>
+                  <span className="sm:hidden">QR Generator</span>
                 </h1>
               </div>
             </div>
@@ -180,6 +218,11 @@ export default function QRGeneratorPage() {
                   <option value={15}>15 minutes</option>
                   <option value={30}>30 minutes</option>
                   <option value={60}>1 hour</option>
+                  <option value={300}>5 hours</option>
+                  <option value={600}>10 hours</option>
+                  <option value={720}>12 hours</option>
+                  <option value={1440}>24 hours</option>
+                  <option value={10080}>1 week</option>
                 </select>
               </div>
 
@@ -232,14 +275,32 @@ export default function QRGeneratorPage() {
                       className="mx-auto"
                     />
                   </div>
-                  <Button
-                    onClick={downloadQR}
-                    variant="outline"
-                    className="flex items-center space-x-2"
-                  >
-                    <Download className="h-4 w-4" />
-                    <span>Download QR Code</span>
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button
+                      onClick={downloadQR}
+                      variant="outline"
+                      className="flex items-center space-x-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      <span>Download</span>
+                    </Button>
+                    <Button
+                      onClick={refreshQR}
+                      variant="outline"
+                      className="flex items-center space-x-2"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                      <span>Refresh</span>
+                    </Button>
+                    <Button
+                      onClick={deleteQR}
+                      variant="destructive"
+                      className="flex items-center space-x-2"
+                    >
+                      <Timer className="h-4 w-4" />
+                      <span>Delete</span>
+                    </Button>
+                  </div>
                 </div>
               </GlassCard>
 

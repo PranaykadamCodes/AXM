@@ -233,28 +233,30 @@ export default function EmployeeDashboard() {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 p-4">
-        <GlassCard className="px-6 py-4">
+      <header className="relative z-10 p-2 sm:p-4">
+        <GlassCard className="px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <User className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                    Welcome back, {user?.name}
+            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+              <div className="flex items-center space-x-2 min-w-0">
+                <User className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <h1 className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white truncate">
+                    <span className="hidden sm:inline">Welcome back, {user?.name}</span>
+                    <span className="sm:hidden">Hi, {user?.name?.split(' ')[0]}</span>
                   </h1>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    {user?.position} • {user?.department}
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 truncate">
+                    <span className="hidden sm:inline">{user?.position} • {user?.department}</span>
+                    <span className="sm:hidden">{user?.position}</span>
                   </p>
                 </div>
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-1 sm:space-x-4 flex-shrink-0">
               <NotificationBell userRole="employee" />
               <ThemeToggle />
-              <Button variant="ghost" size="icon" onClick={handleLogout}>
-                <LogOut className="h-5 w-5" />
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="h-8 w-8 sm:h-10 sm:w-10">
+                <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
             </div>
           </div>
@@ -335,7 +337,7 @@ export default function EmployeeDashboard() {
             <GlassCard className="p-6 h-fit">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Attendance Calendar</h3>
+                  <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white">Attendance Calendar</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300">Click on a date to see details</p>
                 </div>
                 <CalendarIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
@@ -402,10 +404,10 @@ export default function EmployeeDashboard() {
           <div className="xl:col-span-2">
             <GlassCard className="p-6 h-fit">
               <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Weekly Hours</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">Your working hours over the past week</p>
-                </div>
+              <div>
+                <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white">Weekly Hours</h3>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Your working hours over the past week</p>
+              </div>
                 <TrendingUp className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
               </div>
               <ChartContainer config={chartConfig} className="h-[350px] w-full">
@@ -450,9 +452,9 @@ export default function EmployeeDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Selected Date Details */}
           <GlassCard className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white mb-4">
               {format(selectedDate, 'MMMM dd, yyyy')}
-              {isToday(selectedDate) && <span className="text-sm text-indigo-600 dark:text-indigo-400 ml-2">(Today)</span>}
+              {isToday(selectedDate) && <span className="text-xs sm:text-sm text-indigo-600 dark:text-indigo-400 ml-2">(Today)</span>}
             </h3>
             
             {selectedDateAttendance ? (
@@ -505,7 +507,7 @@ export default function EmployeeDashboard() {
 
           {/* Quick Actions */}
           <GlassCard className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Quick Actions</h3>
+            <h3 className="text-sm sm:text-lg font-semibold text-gray-900 dark:text-white mb-6">Quick Actions</h3>
             <div className="space-y-4">
               <Button asChild className="w-full justify-start bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
                 <Link href="/dashboard/emp/scan">

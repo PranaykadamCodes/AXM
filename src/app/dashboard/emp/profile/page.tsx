@@ -165,20 +165,22 @@ export default function EmployeeProfilePage() {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 p-4">
-        <GlassCard className="px-6 py-4">
+      <header className="relative z-10 p-2 sm:p-4">
+        <GlassCard className="px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button variant="ghost" asChild>
-                <Link href="/dashboard/emp" className="flex items-center space-x-2">
-                  <ArrowLeft className="h-5 w-5" />
-                  <span>Back to Dashboard</span>
+            <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+              <Button variant="ghost" asChild className="flex-shrink-0">
+                <Link href="/dashboard/emp" className="flex items-center space-x-1 sm:space-x-2">
+                  <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="hidden sm:inline">Back to Dashboard</span>
+                  <span className="sm:hidden">Back</span>
                 </Link>
               </Button>
-              <div className="flex items-center space-x-2">
-                <User className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  My Profile
+              <div className="flex items-center space-x-2 min-w-0">
+                <User className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />
+                <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent truncate">
+                  <span className="hidden sm:inline">My Profile</span>
+                  <span className="sm:hidden">Profile</span>
                 </h1>
               </div>
             </div>
