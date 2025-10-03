@@ -27,6 +27,7 @@ model User {
   reviewedLeaveRequests LeaveRequest[] @relation("ReviewedBy")
   wfhRequests  WFHRequest[]
   reviewedWFHRequests WFHRequest[] @relation("WFHReviewedBy")
+  nfcTags     NFCTag[]
 
   @@map("users")
 }
@@ -80,4 +81,17 @@ model WFHRequest {
   updatedAt     DateTime  @updatedAt
 
   @@map("wfh_requests")
+}
+
+model NFCTag {
+  id         String   @id @default(uuid())
+  uid        String   @unique
+  label      String
+  location   String?
+  isActive   Boolean  @default(true)
+  createdBy  String
+  creator    User     @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@map("nfc_tags")
 }

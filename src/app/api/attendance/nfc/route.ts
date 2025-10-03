@@ -41,6 +41,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validate NFC tag is registered and active
+    const normalizedUid = (tagUid as string).startsWith('nfc_') ? (tagUid as string).slice(4) : (tagUid as string)
+    const registeredTag = await prisma.nFCTag.findUnique({ where: { uid: normalizedUid } })
+
+    if (!registeredTag || registeredTag.isActive !== true) {
+      return NextResponse.json(
+        { error: 'NFC tag is not registered or inactive' },
+        { status: 400 }
+      )
+    }
+
     // Get user details
     const user = await prisma.user.findUnique({
       where: { id: payload.userId }
@@ -109,8 +120,8 @@ export async function POST(request: NextRequest) {
         userId: payload.userId,
         sessionId,
         type,
-        method: tagUid.startsWith('nfc_') ? 'NFC' : 'RFID',
-        token: tagUid,
+        method: (tagUid as string).startsWith('nfc_') ? 'NFC' : 'RFID',
+        token: normalizedUid,
         latitude,
         longitude
       }

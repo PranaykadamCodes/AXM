@@ -410,7 +410,7 @@ export default function EmployeeDashboard() {
               </div>
                 <TrendingUp className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
               </div>
-              <ChartContainer config={chartConfig} className="h-[350px] w-full">
+            <ChartContainer config={chartConfig} className="h-[220px] sm:h-[300px] md:h-[350px] w-full">
                 <AreaChart data={weeklyStats} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorHours" x1="0" y1="0" x2="0" y2="1">

@@ -526,19 +526,17 @@ export default function LeavePage() {
                         <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
                           <span>Duration: {calculateDays(request.startDate, request.endDate)} day(s)</span>
                           <span>Submitted: {format(new Date(request.createdAt), 'MMM dd, yyyy')}</span>
-                          {request.approvedBy && (
-                            <span>Approved by: {request.approvedBy}</span>
-                          )}
+                          {/* Hide admin-only response details on employee side */}
                         </div>
                       </div>
                       
                       <div className="flex items-center space-x-2">
                         {request.status === 'pending' && (
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => alert('Edit coming soon')}>
                             Edit
                           </Button>
                         )}
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => alert(`Reason: ${request.reason}\nFrom: ${format(new Date(request.startDate), 'MMM dd, yyyy')}\nTo: ${format(new Date(request.endDate), 'MMM dd, yyyy')}`)}>
                           View Details
                         </Button>
                       </div>

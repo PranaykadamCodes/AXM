@@ -12,6 +12,8 @@ interface QRScannerProps {
 export default function QRScanner({ onScan, onError, isScanning }: QRScannerProps) {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null)
   const [isSupported, setIsSupported] = useState(true)
+  const [lastScanAt, setLastScanAt] = useState<number>(0)
+  const cooldownMs = 1000
 
   useEffect(() => {
     // Check if camera is supported
@@ -45,9 +47,11 @@ export default function QRScanner({ onScan, onError, isScanning }: QRScannerProp
   }, [onError])
 
   const handleScan = (result: string | null) => {
-    if (result && isScanning) {
-      onScan(result)
-    }
+    if (!result || !isScanning) return
+    const now = Date.now()
+    if (now - lastScanAt < cooldownMs) return
+    setLastScanAt(now)
+    onScan(result)
   }
 
   const handleError = (error: any) => {
@@ -109,6 +113,8 @@ export default function QRScanner({ onScan, onError, isScanning }: QRScannerProp
                 handleError(err)
               }
             }}
+            // lower delay to improve responsiveness
+            delay={100}
           />
         </div>
       </div>

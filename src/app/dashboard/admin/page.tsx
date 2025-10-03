@@ -282,7 +282,7 @@ export default function AdminDashboard() {
               </div>
               <BarChart3 className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
             </div>
-            <ChartContainer config={chartConfig} className="h-[300px]">
+            <ChartContainer config={chartConfig} className="h-[250px] sm:h-[300px]">
               <AreaChart data={analytics?.charts.dailyAttendance || []}>
                 <defs>
                   <linearGradient id="colorCheckIns" x1="0" y1="0" x2="0" y2="1">
@@ -353,7 +353,7 @@ export default function AdminDashboard() {
                 </div>
                 <QrCode className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
               </div>
-              <ChartContainer config={chartConfig} className="h-[250px]">
+            <ChartContainer config={chartConfig} className="h-[200px] sm:h-[250px]">
                 <BarChart data={analytics?.charts.methodAttendance || []}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
                   <XAxis dataKey="method" stroke="rgba(255,255,255,0.6)" />
@@ -386,6 +386,12 @@ export default function AdminDashboard() {
                 <Link href="/dashboard/admin/qr">
                   <QrCode className="h-4 w-4 mr-2" />
                   Generate QR Code
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full justify-start">
+                <Link href="/dashboard/admin/nfc">
+                  <Smartphone className="h-4 w-4 mr-2" />
+                  NFC Attendance
                 </Link>
               </Button>
               <Button asChild variant="outline" className="w-full justify-start">
